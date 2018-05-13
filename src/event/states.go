@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	ASSET_PATH = "/asset/"
+	ASSET_PATH = "./asset/"
 )
 
 type AlertState struct {
@@ -98,7 +98,7 @@ func ( s * SynchronizeStateEvent ) GetSpeakerContext() string {
 	bytes , _ := ioutil.ReadFile( ASSET_PATH + "SpeakerContext.json" )
 	content = string( bytes )
 
-	content = strings.Replace( content , "{{{VOLUME}}" , strconv.Itoa( s.VolumeState.Volume ) , -1 )
+	content = strings.Replace( content , "{{VOLUME}}" , strconv.Itoa( s.VolumeState.Volume ) , -1 )
 	content = strings.Replace( content , "{{MUTED}}" , s.VolumeState.Muted , -1 )
 
 	return content

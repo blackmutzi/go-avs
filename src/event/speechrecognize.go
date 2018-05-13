@@ -11,7 +11,7 @@ type SpeechRecognize struct {
 	DialogRequestID string
 }
 
-func ( s * SpeechRecognize ) createSpeechRecognizeEvent() string {
+func ( s * SpeechRecognize ) CreateSpeechRecognizeEvent() string {
 	var content string
 
 	bytes , _ := ioutil.ReadFile( ASSET_PATH + "SpeechRecognizeEvent.json" )

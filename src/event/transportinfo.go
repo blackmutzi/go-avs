@@ -1,10 +1,5 @@
 package event
 
-const (
-	FLAG_JSON_AUDIO_HEADER = true
-	FLAG_JSON_FINISHED = true
-)
-
 type TransportInfo struct {
 	Boundary string
 	Message string
@@ -24,7 +19,7 @@ func ( t * TransportInfo ) Reset() {
 func ( t * TransportInfo ) getJsonHeader( audio bool ) string {
 	var content string
 
-	content += "--" + t.Boundary
+	content += "--" + t.Boundary + "\n"
 
 	if audio { // FLAG_JSON_AUDIO_HEADER
 		content += "Content-Disposition: "  + "form-data; name=\"audio\"\n"

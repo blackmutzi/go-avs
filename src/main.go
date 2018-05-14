@@ -53,9 +53,10 @@ func main(){
 	recognize.Event = event.NewSyncStateEvent()
 	recognize.DialogRequestID = "dialog-" + fmt.Sprintf("%s", uuid.Must(uuid.NewV4()) )
 
+	var pcm_bytes []int16
 	recog_info := event.NewTransportInfo("1390402302040" )
 	req := &http2.Request{}
-	req.TransportInfo = recog_info.CreateMessageWithAudioContent( recognize.CreateSpeechRecognizeEvent() , []byte("audio_bytes") )
+	req.TransportInfo = recog_info.CreateMessageWithAudioContent( recognize.CreateSpeechRecognizeEvent() , recog_info.CreateAudio( pcm_bytes ) )
 
 	go client.CreateDownchannel()
 

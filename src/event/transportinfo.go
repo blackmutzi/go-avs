@@ -1,5 +1,11 @@
 package event
 
+import (
+	"encoding/binary"
+	"bytes"
+	"bufio"
+)
+
 type TransportInfo struct {
 	Boundary string
 	Message string
@@ -60,6 +66,13 @@ func ( t * TransportInfo ) CreateMessageWithAudioContent( event string , audio [
 	t.Message += t.getJsonBody( string( audio ) , true )
 	return t
 }
+
+func ( t * TransportInfo ) CreateAudio( pcm []int16 ) []byte {
+	var buffer bytes.Buffer
+	binary.Write( bufio.NewWriter(&buffer) , binary.LittleEndian,  pcm )
+	return buffer.Bytes()
+}
+
 
 
 

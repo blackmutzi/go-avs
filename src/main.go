@@ -4,8 +4,9 @@ import (
 	"auth"
 	"fmt"
 	"http2"
-	"event"
 	"time"
+	"event"
+	"directive"
 )
 
 const (
@@ -32,14 +33,26 @@ func main(){
 
 	go client.CreateDownchannel()
 
-	client.Do( event.NewSystemRequest() )
+	client.Do( http2.NewSystemRequest() )
 	time.Sleep( 2000 * time.Millisecond )
 
-	client.Do( event.NewSettingsRequest("de-DE" ) )
+	client.Do( http2.NewSettingsRequest("de-DE" ) )
 	time.Sleep( 3000 * time.Millisecond )
 
-	client.Do( event.NewSpeechRecognizeWakeWordRequest( []int16{} ))
-	time.Sleep( 3000 * time.Millisecond )
+	response , err := client.Do( http2.NewSpeechRecognizeWakeWordRequest( event.ReadPCMFile("alexa_guten_morgen.wav") ) )
+	fmt.Println( string( response ) )
+
+	for _ , directive := range directive.NewDirectiveReader( response , "--------abcde123") {
+		if directive.Header.Namespace == "SpeechSynthesizer" && directive.Header.Name == "Speak" {
+			if directive.HasMP3Data() {
+
+				// Play Sound
+				// go playMP3Sound( directive.GetMP3Data() )
+				fmt.Println("Play MP3 Sound now ...")
+			}
+		}
+	}
+
 
 	for {
 		time.Sleep( 1000 * time.Millisecond )

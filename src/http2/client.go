@@ -114,9 +114,6 @@ func ( c * Client ) Do( request *Request )( response []byte , err error ){
 	if status , _ := c.checkStatusCode( resp ); status {
 		defer resp.Body.Close()
 		response , err = ioutil.ReadAll( resp.Body )
-		fmt.Println("Custom Response:")
-		fmt.Println( response  )
-
 	} else {
 		// no content
 		fmt.Println("Request: no content ")

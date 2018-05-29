@@ -5,7 +5,7 @@
       },
       "payload": {
           "token": "{{TOKEN_STRING}}",
-          "offsetInMilliseconds": "{{MS}}",
+          "offsetInMilliseconds": {{MS}},
           "playerActivity": "{{ACTIVITY_STRING}}"
       }
 }

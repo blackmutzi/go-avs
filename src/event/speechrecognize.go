@@ -3,7 +3,6 @@ package event
 import (
 	"io/ioutil"
 	"strings"
-	"http2"
 )
 
 type SpeechRecognize struct {
@@ -63,32 +62,12 @@ func ( s * SpeechRecognize ) CreateSpeechRecognizeEvent() string {
 	content = strings.Replace( content , "{{FORMAT_STRING}}" , "AUDIO_L16_RATE_16000_CHANNELS_1" , -1 )
 
 	content = strings.Replace( content , "{{TYPE_STRING}}" , s.InitiatorType , -1 )
-	content = strings.Replace( content , "{{START_INDEX_SAMPLES}}" , "0" , -1 )
-	content = strings.Replace( content , "{{END_INDEX_SAMPLES}}" , "0" , -1 )
+	content = strings.Replace( content , "{{START_INDEX_SAMPLES}}" , s.StartIndexSamples , -1 )
+	content = strings.Replace( content , "{{END_INDEX_SAMPLES}}" , s.EndIndexSamples , -1 )
 	content = strings.Replace( content , "{{PAYLOAD_TOKEN}}" , "" , -1 )
 
 	return content
 }
 
-/*
-	Create a new SpeechRecognize Request with the WakeWord Profil
- */
-func NewSpeechRecognizeWakeWordRequest( pcmBytes []int16 ) ( *http2.Request ) {
-	recognize := NewSpeechRecognizeWakeWordProfil( NewSyncStateEvent() )
-	recogInfo := NewTransportInfo("1390402302040")
-	req := &http2.Request{}
-	req.TransportInfo = recogInfo.CreateMessageWithAudioContent( recognize.CreateSpeechRecognizeEvent() , recogInfo.CreateAudio( pcmBytes ) )
-	return req
-}
 
-/*
-	Create a new SpeechRecognize Request with the WakeWord Profil
- */
-func NewSpeechRecognizeTAPRequest( pcmBytes []int16 ) ( *http2.Request ) {
-	recognize := NewSpeechRecognizeTAPProfil( NewSyncStateEvent() )
-	recogInfo := NewTransportInfo("1390402302040")
-	req := &http2.Request{}
-	req.TransportInfo = recogInfo.CreateMessageWithAudioContent( recognize.CreateSpeechRecognizeEvent() , recogInfo.CreateAudio( pcmBytes ) )
-	return req
-}
 

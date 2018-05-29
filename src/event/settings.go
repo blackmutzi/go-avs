@@ -3,7 +3,6 @@ package event
 import (
 	"io/ioutil"
 	"strings"
-	"http2"
 )
 
 type Settings struct {
@@ -25,18 +24,5 @@ func ( s * Settings ) CreateSettingsUpdateEvent( key string , value string ) str
 	content = strings.Replace( content , "{{VALUE_STRING}}" , value  , -1 )
 
 	return content
-}
-
-/*
-	Create a new Settings Request
- */
-func NewSettingsRequest( acceptedValue string )( *http2.Request ) {
-	settings := &Settings{}
-	settings.MessageID = NewMessageId()
-
-	settingsInfo := NewTransportInfo("1390402302040")
-	req := &http2.Request{}
-	req.TransportInfo = settingsInfo.CreateMessage( settings.CreateSettingsUpdateEvent("locale", acceptedValue ) )
-	return req
 }
 

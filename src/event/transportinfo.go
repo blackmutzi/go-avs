@@ -4,22 +4,23 @@ import (
 	"encoding/binary"
 	"bytes"
 	"bufio"
+	//"github.com/hraban/opus"
+	"io/ioutil"
 )
 
 type TransportInfo struct {
 	Boundary string
-	Message string
+	Message bytes.Buffer
 }
 
 func NewTransportInfo( boundary string ) *TransportInfo{
 	info := &TransportInfo{}
 	info.Boundary = boundary
-	info.Message = ""
 	return info
 }
 
 func ( t * TransportInfo ) Reset() {
-	t.Message = ""
+	t.Message.Reset()
 }
 
 func ( t * TransportInfo ) getJsonHeader( audio bool ) string {
@@ -40,30 +41,31 @@ func ( t * TransportInfo ) getJsonHeader( audio bool ) string {
 	return content
 }
 
-func ( t * TransportInfo ) getJsonBody( event string , finished bool ) string {
-	var content string
-	content += event + "\n"
+func ( t * TransportInfo ) getJsonBody( event []byte , finished bool ) []byte {
+	var content bytes.Buffer
+	content.Write( event )
+	content.Write( []byte("\n") )
 
 	if finished { //FLAG_JSON_FINISHED
-		content += "--" + t.Boundary + "--"
+		content.WriteString("--" + t.Boundary + "--")
 	}
 
-	return content
+	return content.Bytes()
 }
 
 func ( t * TransportInfo ) CreateMessage( event string ) *TransportInfo{
 	t.Reset()
-	t.Message += t.getJsonHeader( false )
-	t.Message += t.getJsonBody( event , true )
+	t.Message.WriteString( t.getJsonHeader( false ) )
+	t.Message.Write( t.getJsonBody( []byte( event ) , true ) )
 	return t
 }
 
 func ( t * TransportInfo ) CreateMessageWithAudioContent( event string , audio []byte ) *TransportInfo{
 	t.Reset()
-	t.Message += t.getJsonHeader( false )
-	t.Message += t.getJsonBody( event , false )
-	t.Message += t.getJsonHeader( true )
-	t.Message += t.getJsonBody( string( audio ) , true )
+	t.Message.WriteString( t.getJsonHeader( false ) )
+	t.Message.Write( t.getJsonBody( []byte( event ) , false ) )
+	t.Message.WriteString( t.getJsonHeader( true ) )
+	t.Message.Write( t.getJsonBody( audio , true ) )
 	return t
 }
 
@@ -71,6 +73,28 @@ func ( t * TransportInfo ) CreateAudio( pcm []int16 ) []byte {
 	var buffer bytes.Buffer
 	binary.Write( bufio.NewWriter(&buffer) , binary.LittleEndian,  pcm )
 	return buffer.Bytes()
+}
+
+/*
+	Decode Opus bytes to PCM bytes
+ */
+func DecodeOpusToPCM( opusBytes []byte ) ( pcm []int16 , samples int ) {
+	//var frameSizeMs float32 = 60
+	//dec , _ := opus.NewDecoder(16000, 1 )
+	//frameSize := 1 * frameSizeMs * 16000 / 1000
+	//pcm = make([]int16, int( frameSize ) )
+	//samples, _ = dec.Decode( opusBytes , pcm )
+	return pcm , samples
+}
+
+/*
+
+ */
+func ReadPCMFile( file string )( pcm []int16 ) {
+	fileBytes , _ := ioutil.ReadFile( file )
+	pcm = make( []int16 , len( fileBytes ) / 2 )
+	binary.Read( bytes.NewReader( fileBytes ) , binary.LittleEndian , pcm )
+	return pcm
 }
 
 

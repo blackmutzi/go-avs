@@ -3,6 +3,7 @@ package event
 import (
 	"io/ioutil"
 	"strings"
+	"http2"
 )
 
 type System struct {
@@ -24,6 +25,34 @@ func ( s * System ) CreateSynchronizeStateEvent() string {
 	content = strings.Replace( content , "{{MESSAGE_ID_STRING}}" , s.MessageID , -1 )
 
 	return content
+}
+
+/*
+	Create a new system request
+
+	Reference:
+ 	https://developer.amazon.com/de/docs/alexa-voice-service/system.html
+ */
+func NewSystemRequest() * http2.Request {
+	system := &System{}
+	system.Event = NewSyncStateEvent()
+	system.MessageID = NewMessageId()
+
+	syncInfo := NewTransportInfo("1390402302040")
+	req := &http2.Request{}
+	req .TransportInfo = syncInfo.CreateMessage( system.CreateSynchronizeStateEvent() )
+	return req
+}
+
+func UpdateSystemRequest( sync * SynchronizeStateEvent ) * http2.Request {
+	system := &System{}
+	system.Event = sync
+	system.MessageID = NewMessageId()
+
+	syncInfo := NewTransportInfo("1390402302040")
+	req := &http2.Request{}
+	req .TransportInfo = syncInfo.CreateMessage( system.CreateSynchronizeStateEvent() )
+	return req
 }
 
 

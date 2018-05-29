@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"http2"
 	"event"
-	"github.com/satori/go.uuid"
 	"time"
 )
 
@@ -30,46 +29,17 @@ func main(){
 
 	// Build Client
 	client := http2.NewClient( EU_ENDPOINT_URL , test.AuthInfo.AccessToken , VERSION )
-	system := event.System{}
-	system.Event = event.NewSyncStateEvent()
-	system.MessageID = fmt.Sprintf("%s", uuid.Must(uuid.NewV4()) )
-
-	// make synchronize event request
-	sync_info := event.NewTransportInfo("1390402302040" )
-	req_sync := &http2.Request{}
-	req_sync.TransportInfo = sync_info.CreateMessage( system.CreateSynchronizeStateEvent() )
-
-	// setup settings event
-	settings := event.Settings{}
-	settings.MessageID = fmt.Sprintf("%s", uuid.Must(uuid.NewV4()) )
-
-	// make settings event request
-	settings_info := event.NewTransportInfo("1390402302040" )
-	req_settings := &http2.Request{}
-	req_settings.TransportInfo = settings_info.CreateMessage( settings.CreateSettingsUpdateEvent("locale", "de-DE") )
-
-	recognize := event.SpeechRecognize{}
-	recognize.MessageID = fmt.Sprintf("%s", uuid.Must(uuid.NewV4()) )
-	recognize.Event = event.NewSyncStateEvent()
-	recognize.DialogRequestID = "dialog-" + fmt.Sprintf("%s", uuid.Must(uuid.NewV4()) )
-
-	var pcm_bytes []int16
-	recog_info := event.NewTransportInfo("1390402302040" )
-	req := &http2.Request{}
-	req.TransportInfo = recog_info.CreateMessageWithAudioContent( recognize.CreateSpeechRecognizeEvent() , recog_info.CreateAudio( pcm_bytes ) )
 
 	go client.CreateDownchannel()
 
-	fmt.Println( req_sync.TransportInfo.Message )
-	client.Do( req_sync )
+	client.Do( event.NewSystemRequest() )
 	time.Sleep( 2000 * time.Millisecond )
 
-	fmt.Println( req_settings.TransportInfo.Message )
-	client.Do( req_settings )
+	client.Do( event.NewSettingsRequest("de-DE" ) )
 	time.Sleep( 3000 * time.Millisecond )
 
-	fmt.Println( req.TransportInfo.Message )
-	client.Do( req )
+	client.Do( event.NewSpeechRecognizeWakeWordRequest( []int16{} ))
+	time.Sleep( 3000 * time.Millisecond )
 
 	for {
 		time.Sleep( 1000 * time.Millisecond )

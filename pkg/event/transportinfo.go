@@ -3,7 +3,6 @@ package event
 import (
 	"encoding/binary"
 	"bytes"
-	"bufio"
 	"io"
 	"fmt"
 	"github.com/hajimehoshi/go-mp3"
@@ -110,8 +109,14 @@ func ( t * TransportInfo ) CreateMessageWithAudioContent( event string , audio [
 }
 
 func ( t * TransportInfo ) CreateAudio( pcm []int16 ) []byte {
-	var buffer bytes.Buffer
-	binary.Write( bufio.NewWriter(&buffer) , binary.LittleEndian,  pcm )
+	buffer := new(bytes.Buffer)
+	binary.Write( buffer , binary.LittleEndian,  pcm )
+	return buffer.Bytes()
+}
+
+func CreateLittleEndianAudioData( pcm []int16 ) []byte {
+	buffer := new(bytes.Buffer)
+	binary.Write( buffer , binary.LittleEndian,  pcm )
 	return buffer.Bytes()
 }
 
@@ -130,7 +135,7 @@ func DecodeOpusToPCM( opusBytes []byte ) ( pcm []int16 , samples int ) {
 func EncodePCMToOpus( pcm []int16 ) []byte {
 	const bufferSize = 1000 // choose any buffer size you like. 1k is plenty.
 	const channels = 1
-	enc , _ := opus.NewEncoder( 48000 , 1 , opus.AppVoIP )
+	enc , _ := opus.NewEncoder( 48000 , 1 , opus.AppAudio )
 	data := make([]byte, bufferSize)
 	n, err := enc.Encode(pcm, data)
 	if err != nil {
@@ -157,10 +162,6 @@ func EncodeMP3ToOpus( mp3data []byte ) []byte {
 	return EncodePCMToOpus( pcm )
 }
 
-
-/*
-
- */
 func ReadPCMFile( file string )( pcm []int16 ) {
 	fileBytes , _ := ioutil.ReadFile( file )
 	pcm = make( []int16 , len( fileBytes ) / 2 )

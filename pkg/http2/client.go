@@ -3,7 +3,7 @@ package http2
 import (
 	"net/http"
 	"io/ioutil"
-	"event"
+	"github.com/blackmutzi/go-avs/pkg/event"
 	"fmt"
 	"encoding/json"
 	"bytes"

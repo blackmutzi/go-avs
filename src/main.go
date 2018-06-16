@@ -1,12 +1,12 @@
 package main
 
 import (
-	"auth"
-	"fmt"
-	"http2"
+	"github.com/blackmutzi/go-avs/pkg/auth"
+	"github.com/blackmutzi/go-avs/pkg/http2"
+	"github.com/blackmutzi/go-avs/pkg/event"
+	"github.com/blackmutzi/go-avs/pkg/directive"
 	"time"
-	"event"
-	"directive"
+	"fmt"
 )
 
 const (
@@ -40,15 +40,15 @@ func main(){
 	time.Sleep( 3000 * time.Millisecond )
 
 	response , err := client.Do( http2.NewSpeechRecognizeWakeWordRequest( event.ReadPCMFile("alexa_guten_morgen.wav") ) )
-	fmt.Println( string( response ) )
 
 	for _ , directive := range directive.NewDirectiveReader( response , "--------abcde123") {
-		if directive.Header.Namespace == "SpeechSynthesizer" && directive.Header.Name == "Speak" {
-			if directive.HasMP3Data() {
+		if directive.Directive.Header.Namespace == "SpeechSynthesizer" && directive.Directive.Header.Name == "Speak" {
+			if directive.Directive.HasMP3Data() {
 
 				// Play Sound
 				// go playMP3Sound( directive.GetMP3Data() )
 				fmt.Println("Play MP3 Sound now ...")
+				//fmt.Println( string( directive.Directive.GetMP3Data() ) )
 			}
 		}
 	}

@@ -8,7 +8,6 @@ import (
 type Settings struct {
 	MessageID string
 }
-
 /*
 	 Accepted Keys: locale
 	 Accepted Values: en-AU, en-CA, en-GB, en-IN, en-US, de-DE, ja-JP

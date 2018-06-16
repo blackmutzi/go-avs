@@ -3,19 +3,14 @@ package http2
 import (
 	"net/http"
 	"io/ioutil"
-	//"encoding/json"
-	"event"
+	"github.com/blackmutzi/go-avs/pkg/event"
 	"fmt"
-	"strings"
 	"encoding/json"
+	"bytes"
 )
 
 type Request struct {
 	TransportInfo *event.TransportInfo
-}
-
-type Response struct {
-
 }
 
 type ExceptionHeader struct {
@@ -99,39 +94,99 @@ func ( c * Client ) CreateDownchannel() ( err error ) {
 	defer resp.Body.Close()
 	bytes , _ := ioutil.ReadAll( resp.Body )
 
-	fmt.Println("Downchannel Response:\n")
+	fmt.Println("Downchannel Response:")
 	fmt.Println( string( bytes ) )
-
-
 	fmt.Println("Downchannel Bye, Bye!")
 	return err
 }
 
-func ( c * Client ) Do( request *Request )( err error ){
-	req , err := http.NewRequest("POST", c.EndPointURL + c.EventsPath , strings.NewReader(  request.TransportInfo.Message ) )
+func ( c * Client ) Do( request *Request )( response []byte , err error ){
+	req , err := http.NewRequest("POST", c.EndPointURL + c.EventsPath , bytes.NewReader( request.TransportInfo.Message.Bytes() ) )
 	req.Header.Add("authorization", "Bearer " + c.AccessToken )
 	req.Header.Add("content-type", "multipart/form-data; boundary=" + request.TransportInfo.Boundary )
 
+	fmt.Println( string( request.TransportInfo.Message.Bytes() ) )
+
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return err
+		return nil , err
 	}
 	if status , _ := c.checkStatusCode( resp ); status {
-
 		defer resp.Body.Close()
-		bytes , _ := ioutil.ReadAll( resp.Body )
-
-		fmt.Println("Custom Response:\n")
-		fmt.Println( bytes )
-
+		response , err = ioutil.ReadAll( resp.Body )
 	} else {
 		// no content
 		fmt.Println("Request: no content ")
+		response = nil
 	}
 
-
-	return err
+	return response , err
 }
+
+/*
+	Create a new Settings Request
+	Accepted Values: en-AU, en-CA, en-GB, en-IN, en-US, de-DE, ja-JP
+ */
+func NewSettingsRequest( acceptedValue string )( *Request ) {
+	settings := &event.Settings{}
+	settings.MessageID = event.NewMessageId()
+
+	settingsInfo := event.NewTransportInfo("1390402302040")
+	req := &Request{}
+	req.TransportInfo = settingsInfo.CreateMessage( settings.CreateSettingsUpdateEvent("locale", acceptedValue ) )
+	return req
+}
+
+/*
+	create a new SpeechRecognize Request with the WakeWord Profil
+ */
+func NewSpeechRecognizeWakeWordRequest( pcmBytes []int16 ) ( *Request ) {
+	recognize := event.NewSpeechRecognizeWakeWordProfil( event.NewSyncStateEvent() )
+	recogInfo := event.NewTransportInfo("1390402302040")
+	req := &Request{}
+	req.TransportInfo = recogInfo.CreateMessageWithAudioContent( recognize.CreateSpeechRecognizeEvent() , recogInfo.CreateAudio( pcmBytes ) )
+	return req
+}
+
+/*
+	create a new SpeechRecognize Request with the TAP Profil
+ */
+func NewSpeechRecognizeTAPRequest( pcmBytes []int16 ) ( *Request ) {
+	recognize := event.NewSpeechRecognizeTAPProfil( event.NewSyncStateEvent() )
+	recogInfo := event.NewTransportInfo("1390402302040")
+	req := &Request{}
+	req.TransportInfo = recogInfo.CreateMessageWithAudioContent( recognize.CreateSpeechRecognizeEvent() , recogInfo.CreateAudio( pcmBytes ) )
+	return req
+}
+
+/*
+	Create a new system request
+
+	Reference:
+ 	https://developer.amazon.com/de/docs/alexa-voice-service/system.html
+ */
+func NewSystemRequest() * Request {
+	system := &event.System{}
+	system.Event = event.NewSyncStateEvent()
+	system.MessageID = event.NewMessageId()
+
+	syncInfo := event.NewTransportInfo("1390402302040")
+	req := &Request{}
+	req .TransportInfo = syncInfo.CreateMessage( system.CreateSynchronizeStateEvent() )
+	return req
+}
+
+func UpdateSystemRequest( sync * event.SynchronizeStateEvent ) * Request {
+	system := &event.System{}
+	system.Event = sync
+	system.MessageID = event.NewMessageId()
+
+	syncInfo := event.NewTransportInfo("1390402302040")
+	req := &Request{}
+	req .TransportInfo = syncInfo.CreateMessage( system.CreateSynchronizeStateEvent() )
+	return req
+}
+
 
 
 

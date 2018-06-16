@@ -7,7 +7,7 @@
         },
         "payload": {
             "token": "{{TOKEN_STRING}}",
-            "offsetInMilliseconds": "{{OFFSET_MS}}"
+            "offsetInMilliseconds": {{OFFSET_MS}}
         }
     }
 } 

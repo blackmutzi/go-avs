@@ -4,7 +4,7 @@
        "name": "VolumeState"
    },
    "payload": {
-       "volume": "{{VOLUME}}",
-       "muted": "{{MUTED}}"
+       "volume": {{VOLUME}} ,
+       "muted": {{MUTED}}
    }
 }

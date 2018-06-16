@@ -20,9 +20,10 @@
         "type": "{{TYPE_STRING}}",
         "payload": {
           "wakeWordIndices": {
-            "startIndexInSamples": {{LONG}},
-            "endIndexInSamples": {{LONG}}
-          }
+            "startIndexInSamples": {{START_INDEX_SAMPLES}},
+            "endIndexInSamples": {{END_INDEX_SAMPLES}}
+          },
+          "token": "{{PAYLOAD_TOKEN}}"
         }
       }
     }

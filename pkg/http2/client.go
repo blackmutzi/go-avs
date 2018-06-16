@@ -149,6 +149,17 @@ func NewSpeechRecognizeWakeWordRequest( pcmBytes []int16 ) ( *Request ) {
 }
 
 /*
+	create a new SpeechRecognize Request with the WakeWord Profil Default
+ */
+func NewSpeechRecognizeWakeWordRequestDefault( pcmLittleEndianBytes []byte ) ( *Request ) {
+	recognize := event.NewSpeechRecognizeWakeWordProfil( event.NewSyncStateEvent() )
+	recogInfo := event.NewTransportInfo("1390402302040")
+	req := &Request{}
+	req.TransportInfo = recogInfo.CreateMessageWithAudioContent( recognize.CreateSpeechRecognizeEvent() , pcmLittleEndianBytes )
+	return req
+}
+
+/*
 	create a new SpeechRecognize Request with the TAP Profil
  */
 func NewSpeechRecognizeTAPRequest( pcmBytes []int16 ) ( *Request ) {
